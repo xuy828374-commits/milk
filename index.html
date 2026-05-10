@@ -16,6 +16,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="https://file.youtochat.com/images/20260216/1771224856844_qdqqd.jpeg">
     <link rel="apple-touch-icon" href="https://file.youtochat.com/images/20260216/1771224856844_qdqqd.jpeg">
     <meta name="apple-mobile-web-app-title" content="ʚ𝑳𝑶𝑽𝑬ɞ">
+    <link rel="manifest" href="manifest.json">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 
@@ -1289,6 +1290,11 @@
                             <div class="keepalive-wave-bar" style="animation-delay:0.05s;"></div>
                             <span style="font-size:11px;color:var(--accent-color);margin-left:6px;font-weight:600;">LIVE</span>
                         </div>
+                        <div class="setting-pill-row" id="test-notification-btn" onclick="testSystemNotification()" style="border-top:1px solid var(--border-color);">
+                            <span class="setting-pill-icon"><i class="fas fa-bell"></i></span>
+                            <span class="setting-pill-label">测试系统通知 <span style="font-size:11px;color:var(--text-secondary);font-weight:400;">发送一条网页外弹窗通知</span></span>
+                            <i class="fas fa-chevron-right" style="color:var(--text-secondary);font-size:12px;flex-shrink:0;"></i>
+                        </div>
                     </div>
                 </div>
                 <div class="cs-panel" id="cs-panel-display">
@@ -2196,6 +2202,38 @@
 </div>
 
 <div id="dg-editor-modal" style="display:none;"></div>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+        
+        function testSystemNotification() {
+            if (!("Notification" in window)) {
+                alert("此浏览器不支持系统通知");
+                return;
+            }
+            
+            Notification.requestPermission().then(function (permission) {
+                if (permission === "granted") {
+                    navigator.serviceWorker.ready.then(function(registration) {
+                        registration.showNotification("传讯", {
+                            body: "这是一条测试通知！",
+                            icon: "https://file.youtochat.com/images/20260216/1771224856844_qdqqd.jpeg",
+                            vibrate: [200, 100, 200]
+                        });
+                    });
+                } else {
+                    alert("通知权限未授予，请在浏览器设置中开启");
+                }
+            });
+        }
+    </script>
     <!-- == 核心层 == -->
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
