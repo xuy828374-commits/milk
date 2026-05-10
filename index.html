@@ -1142,6 +1142,11 @@
                             <input type="range" min="1000" max="120000" step="1000" value="7000" class="font-size-slider" id="reply-delay-max-slider">
                             <span class="cs-slider-val" id="reply-delay-max-value">7s</span>
                         </div>
+                        <div class="cs-slider-row">
+                            <span class="cs-slider-label">回复条数</span>
+                            <input type="range" min="0" max="5" step="1" value="0" class="font-size-slider" id="reply-count-slider">
+                            <span class="cs-slider-val" id="reply-count-value">随机</span>
+                        </div>
                     </div>
 
                     <p class="cs-group-label" style="margin-top:4px;">主动发送</p>
@@ -1154,7 +1159,7 @@
                         <div id="auto-send-control" style="display:none;">
                             <div class="cs-slider-row">
                                 <span class="cs-slider-label">间隔</span>
-                                <input type="range" min="1" max="120" step="1" value="5" class="font-size-slider" id="auto-send-slider">
+                                <input type="range" min="10" max="3600" step="10" value="300" class="font-size-slider" id="auto-send-slider">
                                 <span class="cs-slider-val" id="auto-send-value">5分钟</span>
                             </div>
                         </div>

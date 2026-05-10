@@ -999,6 +999,8 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
             const minDelayValue = document.getElementById('reply-delay-min-value');
             const maxDelaySlider = document.getElementById('reply-delay-max-slider');
             const maxDelayValue = document.getElementById('reply-delay-max-value');
+            const replyCountSlider = document.getElementById('reply-count-slider');
+            const replyCountValue = document.getElementById('reply-count-value');
 
             window.switchCsTab = function switchCsTab(btn) {
                 document.querySelectorAll('.cs-tab').forEach(t => t.classList.remove('active'));
@@ -1016,6 +1018,11 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                 const maxSec = settings.replyDelayMax / 1000;
                 maxDelayValue.textContent = maxSec >= 60 ? `${(maxSec/60).toFixed(1)}分钟` : `${maxSec.toFixed(0)}s`;
                 maxDelaySlider.min = settings.replyDelayMin; 
+                
+                if (replyCountSlider) {
+                    replyCountSlider.value = settings.replyCount || 0;
+                    replyCountValue.textContent = (settings.replyCount && settings.replyCount > 0) ? `${settings.replyCount}条` : '随机';
+                }
             }
             updateDelayUI();
 
@@ -1036,6 +1043,14 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                 updateDelayUI();
             });
             maxDelaySlider.addEventListener('change', throttledSaveData);
+
+            if (replyCountSlider) {
+                replyCountSlider.addEventListener('input', (e) => {
+                    settings.replyCount = parseInt(e.target.value, 10);
+                    updateDelayUI();
+                });
+                replyCountSlider.addEventListener('change', throttledSaveData);
+            }
 
             const settingToggles = {
                 '#reply-toggle': {
@@ -1216,9 +1231,10 @@ const autoSendValue = document.getElementById('auto-send-value');
 const updateAutoSendUI = () => {
     autoSendToggle.classList.toggle('active', !!settings.autoSendEnabled);
     autoSendControl.style.display = settings.autoSendEnabled ? "flex" : "none";
-    const currentVal = settings.autoSendInterval || 5;
+    let currentVal = settings.autoSendInterval || 300;
+    if (currentVal <= 60 && currentVal < 10) currentVal = currentVal * 60;
     autoSendSlider.value = currentVal;
-    autoSendValue.textContent = `${currentVal}分钟`;
+    autoSendValue.textContent = currentVal >= 60 ? `${Math.floor(currentVal/60)}分${currentVal%60}秒` : `${currentVal}秒`;
 };
 
 updateAutoSendUI();
@@ -1231,13 +1247,15 @@ autoSendToggle.addEventListener('click', () => {
     showNotification(`主动发送已${settings.autoSendEnabled ? '开启' : '关闭'}`, 'success');
 });
 
-autoSendSlider.value = settings.autoSendInterval || 5;
-autoSendValue.textContent = `${settings.autoSendInterval || 5}分钟`;
+let initialAutoSendVal = settings.autoSendInterval || 300;
+if (initialAutoSendVal <= 60 && initialAutoSendVal < 10) initialAutoSendVal = initialAutoSendVal * 60;
+autoSendSlider.value = initialAutoSendVal;
+autoSendValue.textContent = initialAutoSendVal >= 60 ? `${Math.floor(initialAutoSendVal/60)}分${initialAutoSendVal%60}秒` : `${initialAutoSendVal}秒`;
 
 autoSendSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     settings.autoSendInterval = val;
-    autoSendValue.textContent = `${val}分钟`;
+    autoSendValue.textContent = val >= 60 ? `${Math.floor(val/60)}分${val%60}秒` : `${val}秒`;
 });
 
 autoSendSlider.addEventListener('change', () => {

@@ -537,13 +537,28 @@ window._sendPartnerNotification = function(title, body) {
         if (localStorage.getItem('notifEnabled') !== '1') return;
         if (!('Notification' in window)) return;
         if (Notification.permission !== 'granted') return;
-        if (!document.hidden) return;
-        new Notification(title || '传讯', {
-            body: body || '对方发来了消息',
-            icon: (document.querySelector('#partner-avatar img') || {}).src,
-            tag: 'partner-msg',
-            renotify: true
-        });
+        // if (!document.hidden) return; // Removed to allow notifications even when active
+        
+        const iconSrc = (document.querySelector('#partner-avatar img') || {}).src || 'https://file.youtochat.com/images/20260216/1771224856844_qdqqd.jpeg';
+        
+        if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+            navigator.serviceWorker.ready.then(function(registration) {
+                registration.showNotification(title || '传讯', {
+                    body: body || '对方发来了消息',
+                    icon: iconSrc,
+                    tag: 'partner-msg',
+                    renotify: true,
+                    vibrate: [100, 50, 100]
+                });
+            });
+        } else {
+            new Notification(title || '传讯', {
+                body: body || '对方发来了消息',
+                icon: iconSrc,
+                tag: 'partner-msg',
+                renotify: true
+            });
+        }
     } catch(e) {}
 };
 

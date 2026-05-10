@@ -91,6 +91,7 @@
                 musicPlayerEnabled: false,
                 replyDelayMin: 3000,
                 replyDelayMax: 7000,
+                replyCount: 0,
                 inChatAvatarEnabled: true,
                 inChatAvatarSize: 36,
                 inChatAvatarPosition: 'center',
@@ -714,17 +715,22 @@ if (customIntros && customIntros.length > 0) {
 
 function manageAutoSendTimer() {
     if (autoSendTimer) {
-        clearInterval(autoSendTimer);
+        clearTimeout(autoSendTimer);
         autoSendTimer = null;
     }
     if (settings.autoSendEnabled) {
-        const intervalMs = settings.autoSendInterval * 60 * 1000;
+        let intervalSec = settings.autoSendInterval || 300;
+        if (intervalSec <= 60 && intervalSec < 10) intervalSec = intervalSec * 60;
+        const baseIntervalMs = intervalSec * 1000;
+        const variance = baseIntervalMs * 0.2;
+        const nextInterval = baseIntervalMs - variance + Math.random() * variance * 2;
         
-        autoSendTimer = setInterval(() => {
+        autoSendTimer = setTimeout(() => {
             if (!document.body.classList.contains('batch-favorite-mode')) {
                 simulateReply(); 
             }
-        }, intervalMs);
+            manageAutoSendTimer();
+        }, nextInterval);
     }
 }
 
@@ -1445,12 +1451,20 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                         type: 'system'
                     });
                     if (typeof playSound === 'function') playSound('partner_poke');
+                    if (typeof window._sendPartnerNotification === 'function') {
+                        window._sendPartnerNotification(settings.partnerName || '对方', pokeText);
+                    }
                 (function(){try{if(window._typingIndicatorAutoHideTimer){clearTimeout(window._typingIndicatorAutoHideTimer);window._typingIndicatorAutoHideTimer=null;}}catch(e){}var _tiW=document.getElementById('typing-indicator-wrapper');if(_tiW){var _tiInner=_tiW.querySelector('.typing-indicator');if(_tiInner){_tiInner.classList.add('hiding');setTimeout(function(){_tiW.style.display='none';if(_tiInner)_tiInner.classList.remove('hiding');},240);}else{_tiW.style.display='none';}}})();
         return;
     }
 }
 
-            const replyCount = Math.random() < 0.75 ? 1: (Math.random() < 0.95 ? 2: 3);
+            let replyCount = 1;
+            if (settings.replyCount && settings.replyCount > 0) {
+                replyCount = settings.replyCount;
+            } else {
+                replyCount = Math.random() < 0.75 ? 1: (Math.random() < 0.95 ? 2: 3);
+            }
             if (!customReplies || customReplies.length === 0) {
                 showNotification('回复库为空，请先到「自定义回复」中添加内容', 'info', 3500);
                 return;
